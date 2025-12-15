@@ -35,7 +35,7 @@ jobs:
           port: ${{ secrets.DEPLOY_PORT }}
           password: ${{ secrets.DEPLOY_PASSWORD }}
           script: |
-              cd ~/EUkraineCoop
+              cd ~/focus-project-app
               cat << 'EOF' > .env.production
               ${{ secrets.ENV_PROD }}
               EOF
