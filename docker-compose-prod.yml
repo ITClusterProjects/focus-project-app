@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  focus-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: focus-web
+    restart: always
+    expose:
+      - "3000"
+    env_file:
+      - .env.production    
+    environment:
+      - NODE_ENV=production
+      - VIRTUAL_HOST=rivnefoodfocus.info
+      - VIRTUAL_PORT=3000
+      - LETSENCRYPT_HOST=rivnefoodfocus.info
+      - LETSENCRYPT_EMAIL=irynamertsalova@gmail.com
+    networks:
+      - lametsy_meteo_net
+
+networks:
+  lametsy_meteo_net:
+    external: true
