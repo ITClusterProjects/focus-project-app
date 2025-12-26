@@ -1,21 +1,32 @@
-# Використовуємо офіційний Node.js образ
-FROM node:20-alpine AS base
-
-# Встановлюємо робочу директорію
+FROM node:20-alpine AS deps
 WORKDIR /app
+RUN apk add --no-cache libc6-compat
+COPY package.json package-lock.json* ./
+RUN npm ci --legacy-peer-deps
 
-# Копіюємо package.json і встановлюємо залежності
-COPY package*.json ./
-RUN npm install --production --ignore-scripts
-
-# Копіюємо увесь код
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Будуємо Next.js проєкт
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 RUN npm run build
 
-# Вказуємо порт (Next.js слухає 3000)
-EXPOSE 3000
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Запускаємо додаток
-CMD ["npm", "start"]
+RUN addgroup --system --gid 1001 nodejs \
+ && adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+COPY --from=builder /app/next.config.ts ./next.config.ts
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.env.production ./.env.production
+
+USER nextjs
+EXPOSE 3000
+CMD ["npx", "next", "start", "-p", "3000"]
