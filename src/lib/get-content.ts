@@ -16,25 +16,26 @@ const getAuth = cache(() => {
   });
 });
 
-export const getSheet = unstable_cache(
-  async (sheetName: string) => {
-    const auth = getAuth();
-    const sheets = google.sheets({ version: "v4", auth });
+export const getSheet = (sheetName: string) =>
+  unstable_cache(
+    async () => {
+      const auth = getAuth();
+      const sheets = google.sheets({ version: "v4", auth });
 
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.SPREADSHEET_ID,
-      range: sheetName,
-    });
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.SPREADSHEET_ID!,
+        range: sheetName,
+      });
 
-    const [header, ...rows] = response.data.values ?? [];
+      const [header, ...rows] = response.data.values ?? [];
 
-    return rows.map((row) =>
-      Object.fromEntries(row.map((value, i) => [header[i], value]))
-    );
-  },
-  ["sheet-cache"],
-  { revalidate: 3600 }
-);
+      return rows.map((row) =>
+        Object.fromEntries(row.map((value, i) => [header[i], value]))
+      );
+    },
+    [`sheet-cache-${sheetName}`],
+    { revalidate: 60 }
+  )();
 
 export const getLocalizedContent = async (
   sheetName: string,
@@ -51,7 +52,6 @@ export const getDictionary = (lang: LangEnum) => {
 export const getStaticContent = async (sheetName: string) => {
   return await getSheet(sheetName);
 };
-
 
 export function splitByDash(text: string) {
   const [title, ...rest] = text.split(/[-–—]/);
@@ -75,13 +75,12 @@ export const splitTextByColon = (text: string) => {
   return { before, after };
 };
 
-
 export function parseParagraphs(cellValue: string) {
   if (!cellValue) return [];
 
   return cellValue
     .split(/\n{2,}/)
-    .map(t => t.trim())
+    .map((t) => t.trim())
     .filter(Boolean);
 }
 
