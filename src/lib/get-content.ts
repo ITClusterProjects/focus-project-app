@@ -84,6 +84,17 @@ export function parseParagraphs(cellValue: string) {
     .filter(Boolean);
 }
 
+export function parseLinks(value?: string): string[] {
+  console.log("parseLinks value", value);
+  if (!value) return [];
+
+  return value
+    .split(/, |;/)
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+
 export default function convertDriveUrl(url: string): string {
   const match = url.match(/\/d\/([^/]+)\//);
   return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : url;

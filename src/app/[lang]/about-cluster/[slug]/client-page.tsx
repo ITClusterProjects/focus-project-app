@@ -1,6 +1,6 @@
 "use client";
 
-import { LangEnum } from "@/assets/data";
+import { getLinkType, LangEnum, linksIcons } from "@/assets/data";
 import {
   AttentionBlock,
   DefaultBodyBlock,
@@ -9,6 +9,7 @@ import PartnersListCard from "@/components/cards/partners-card";
 import {
   LargeHeadline,
   SmallHeadline,
+  SmallText,
   SubHeadline,
   TextBody,
 } from "@/components/typography";
@@ -99,10 +100,11 @@ export default function PartnerDetailsPage({
           </AttentionBlock>
         </MainBlock>
       )}
+
       {item.thankfulWords && (
         <DefaultBodyBlock
           $isMainBlock
-          className="d-flex flex-column align-items-center pt-0"
+          className="d-flex flex-column align-items-center pt-3"
         >
           <AttentionBlock
             $bgColor={"transparent"}
@@ -119,6 +121,44 @@ export default function PartnerDetailsPage({
             </TextBody>
           </AttentionBlock>
         </DefaultBodyBlock>
+      )}
+      {item.links.length !== 0 && (
+        <MainBlock data-type="links-block" className="d-flex flex-column gap-3">
+          <SmallHeadline>
+            {lang === LangEnum.en ? "Links" : "Посилання"}:
+          </SmallHeadline>
+          <div>
+            {" "}
+            {item.links.map((link) => {
+              const type = getLinkType(link);
+
+              if (type === "website") {
+                return (
+                  <a
+                    key={link}
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <SmallText>{link}</SmallText>
+                  </a>
+                );
+              }
+
+              return (
+                <a
+                  key={link}
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={linksIcons[type].icon} alt={type} />
+                  <SmallText>{linksIcons[type].name}</SmallText>
+                </a>
+              );
+            })}
+          </div>
+        </MainBlock>
       )}
     </PageBlock>
   );
@@ -139,6 +179,37 @@ const MainBlock = styled.div`
       img {
         width: 40px;
         height: 40px;
+      }
+    }
+  }
+  &[data-type="links-block"] {
+    padding-top: 24px;
+    padding-bottom: 40px;
+    width: 100%;
+    ${SmallHeadline} {
+      color: ${COLORS.accent};
+    }
+    div {
+      display: flex;
+      /* flex-direction: column; */
+      gap: 40px;
+      row-gap: 24px;
+      flex-wrap: wrap;
+      width: 100%;
+      a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        img {
+          height: 28px;
+          width: 28px;
+        }
+        p {
+          color: ${COLORS.secondary};
+          text-decoration: 1.5px solid underline;
+          text-underline-offset: 2px;
+          text-decoration-color: ${COLORS.accent};
+        }
       }
     }
   }

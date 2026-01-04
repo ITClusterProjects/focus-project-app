@@ -2,6 +2,7 @@ import { LangEnum } from "@/assets/data";
 import convertDriveUrl, {
     getDictionary,
   getSheet,
+  parseLinks,
   parseParagraphs,
   splitTextByColon,
 } from "@/lib/get-content";
@@ -16,7 +17,7 @@ export default async function PartnerPage({
   const { lang, slug } = await params;
   const code = lang === LangEnum.en ? LangEnum.en : LangEnum.uk;
 
-  const rows = await getSheet("partners!A:O");
+  const rows = await getSheet("partners!A:P");
 
 const dict = getDictionary(code);
 
@@ -34,6 +35,7 @@ const dict = getDictionary(code);
     quote: splitTextByColon(rowsForPartner[0][`quote_${lang}`] || ""),
     motto: rowsForPartner[0][`motto_${lang}`],
     thankfulWords: rowsForPartner[0][`thankfulWords_${lang}`],
+    links: parseLinks(rowsForPartner[0].links),
   };
 
   return <PartnerDetailsPage btnText={dict["about-cluster"].buttonText} item={partnerInfo} lang={code} />;

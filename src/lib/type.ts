@@ -15,4 +15,5 @@ export interface PartnerDetails {
   quote: { before: string; after: string };
   motto: string;
   thankfulWords: string;
+  links: string[];
 }
